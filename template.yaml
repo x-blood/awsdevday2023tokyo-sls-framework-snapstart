@@ -1,0 +1,56 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  lambda-quarkus-sample
+  Sample SAM Template for lambda-quarkus
+
+Globals:
+  Function:
+    Tracing: Active
+    CodeUri: target/quarkus-lambda-function-1.0.0-SNAPSHOT-aws.jar
+    Handler: io.quarkus.amazon.lambda.runtime.QuarkusStreamHandler::handleRequest
+    Runtime: java17
+    Timeout: 10
+    MemorySize: 2048
+    Environment:
+      Variables:
+        PRODUCT_TABLE_NAME: !Ref ProductsTable
+
+Resources:
+  PutProductFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Environment:
+        Variables:
+          quarkus_lambda_handler: createProduct
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ProductsTable
+      Events:
+        PutRequest:
+          Type: HttpApi
+          Properties:
+            Path: /products/{id}
+            Method: put
+
+  PutProductFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${PutProductFunction}"
+      RetentionInDays: 7
+
+  ProductsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: 'PK'
+          AttributeType: 'S'
+      KeySchema:
+        - AttributeName: 'PK'
+          KeyType: 'HASH'
+      BillingMode: PAY_PER_REQUEST
+
+Outputs:
+  ApiEndpoint:
+    Description: "API Gateway endpoint URL for Prod stage for Quarkus sample function"
+    Value: !Sub "https://${ServerlessHttpApi}.execute-api.${AWS::Region}.amazonaws.com/products"
