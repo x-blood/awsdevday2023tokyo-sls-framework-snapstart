@@ -1,8 +1,7 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: >
-  lambda-quarkus-sample
-  Sample SAM Template for lambda-quarkus
+  5. Framework SnapStart
 
 Globals:
   Function:
@@ -12,9 +11,13 @@ Globals:
     Runtime: java17
     Timeout: 10
     MemorySize: 2048
+    AutoPublishAlias: live
+    SnapStart:
+      ApplyOn: PublishedVersions
     Environment:
       Variables:
         PRODUCT_TABLE_NAME: !Ref ProductsTable
+#        JAVA_TOOL_OPTIONS: "-verbose:class"
 
 Resources:
   PutProductFunction:
