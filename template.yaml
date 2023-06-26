@@ -37,6 +37,8 @@ Resources:
             ApiId: !Ref HttpApi
             Path: /products/{id}
             Method: put
+      Tags:
+        DoNotNuke: "true"
 
   HttpApi:
     Type: AWS::Serverless::HttpApi
